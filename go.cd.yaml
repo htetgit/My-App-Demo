@@ -1,0 +1,55 @@
+environments:
+  - name: Test-env
+
+agents:
+  - name: admin
+    resources: [docker]
+    environment_variables:
+      GOCD_AGENT_WORK_DIR: "C:\\Program Files (x86)\\Go Agent"
+      DOCKER_HOST: "tcp://docker:2375"
+    hostname: 127.0.0.1
+    operating_system: Windows 10
+    agent_state: Idle
+    free_space: "857.36 GB"
+
+pipelines:
+  hello-world-pipeline:
+    group: myFirstpipeline
+    label_template: '${COUNT}'
+    materials:
+      - git:
+          url: https://github.com/htetgit/My-App-Demo.git
+          branch: main
+    stages:
+      - name: Build
+        jobs:
+          - name: Compile
+            tasks:
+              - exec:
+                  command: go
+                  arguments: ["build", "-o", "main", "."]
+                  working_directory: "."
+      - name: Dockerize
+        jobs:
+          - name: BuildDockerImage
+            tasks:
+              - exec:
+                  command: docker
+                  arguments: ["build", "-t", "my-golang-app", "."]
+                  working_directory: "."
+      - name: Test
+        jobs:
+          - name: RunTests
+            tasks:
+              - exec:
+                  command: echo
+                  arguments: ["No tests defined."]
+                  working_directory: "."
+      - name: Deploy
+        jobs:
+          - name: StartApplication
+            tasks:
+              - exec:
+                  command: docker
+                  arguments: ["run", "-d", "-p", "8080:8080", "my-golang-app"]
+                  working_directory: "."
