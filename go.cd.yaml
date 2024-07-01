@@ -7,6 +7,9 @@ agents:
     environment_variables:
       GOCD_AGENT_WORK_DIR: "C:\\Program Files (x86)\\Go Agent"
       DOCKER_HOST: "tcp://docker:2375"
+      DOCKER_USERNAME: "hym101"  # Set your DockerHub username
+      DOCKER_PASSWORD: "!@#123456"
+
     hostname: 127.0.0.1
     operating_system: Windows 10
     agent_state: Idle
@@ -30,4 +33,21 @@ pipelines:
                   command: go
                   arguments: ["build", "-o", "main.exe", "."]
                   working_directory: "."
-      # Add more stages if needed
+      - name: Dockerize
+        jobs:
+          - name: BuildDockerImage
+            agent: admin
+            tasks:
+              - exec:
+                  command: docker
+                  arguments: ["build", "-t", "my-golang-app", "."]
+                  working_directory: "."
+              - exec:
+                  command: docker
+                  arguments: ["tag", "my-golang-app", "hym101/my-golang-app:latest"]
+              - exec:
+                  command: docker
+                  arguments: ["login", "-u", "${DOCKER_USERNAME}", "-p", "${DOCKER_PASSWORD}"]
+              - exec:
+                  command: docker
+                  arguments: ["push", "your-dockerhub-username/my-golang-app:latest"]
