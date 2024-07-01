@@ -13,8 +13,8 @@ agents:
     free_space: "857.36 GB"
 
 pipelines:
-  hello-world-pipeline:
-    group: myFirstpipeline
+  - name: GoCDPipeline
+    group: my_pipeline_group
     label_template: '${COUNT}'
     materials:
       - git:
@@ -24,32 +24,10 @@ pipelines:
       - name: Build
         jobs:
           - name: Compile
+            agent: admin
             tasks:
               - exec:
                   command: go
-                  arguments: ["build", "-o", "main", "."]
+                  arguments: ["build", "-o", "main.exe", "."]
                   working_directory: "."
-      - name: Dockerize
-        jobs:
-          - name: BuildDockerImage
-            tasks:
-              - exec:
-                  command: docker
-                  arguments: ["build", "-t", "my-golang-app", "."]
-                  working_directory: "."
-      - name: Test
-        jobs:
-          - name: RunTests
-            tasks:
-              - exec:
-                  command: echo
-                  arguments: ["No tests defined."]
-                  working_directory: "."
-      - name: Deploy
-        jobs:
-          - name: StartApplication
-            tasks:
-              - exec:
-                  command: docker
-                  arguments: ["run", "-d", "-p", "8080:8080", "my-golang-app"]
-                  working_directory: "."
+      # Add more stages if needed
